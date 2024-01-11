@@ -1,3 +1,7 @@
+body {
+  background-color: black;
+}
+
 .link {
   fill: none;
   stroke: black;
@@ -5,14 +9,64 @@
   transition: stroke 200ms;
 }
 
+.NODE {
+  stroke-width: 6;
+}
+
+.NodeCircle {
+  fill: rgb(0, 148, 185);
+}
+
+circle.NodeCircle {
+  transition: fill 200ms;
+}
+
+.visited circle.NodeCircle {
+  fill: rgb(255, 225, 0);
+}
+
+.NODE.visited {
+  fill: none;
+  stroke: rgb(255, 179, 0);
+}
+
+.NODE.visited text {
+  /* Add styles for the text when its parent node has the class '.visited' */
+  stroke: none;
+  fill: black; /* Change the text color when visited */
+  transition: fill 400ms;
+}
+
 .keepHL.highlighted {
   stroke: red;
 }
 
 .keepHL {
-  stroke: darkorange;
+  stroke: rgb(102, 0, 255);
+}
+
+.keepHL.FinalPath {
+  stroke: rgb(140, 255, 0);
 }
 
 svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  background-color: gray;
   border: 5px solid black;
+}
+
+p#current {
+  position: absolute;
+  bottom: 25px;
+  right: 30%;
+  width: fit-content;
+  height: fit-content;
+  padding: 10px;
+  font-size: 50px;
+  color: white;
+  font-family: Arial;
+  background-color: rgba(0, 0, 0, 0.5);
 }

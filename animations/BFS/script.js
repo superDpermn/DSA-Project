@@ -1,4 +1,6 @@
 // Sample data representing nodes and links
+const nodeCount = 14;
+
 const nodes = [
   { id: 0, name: "A" },
   { id: 1, name: "B" },
@@ -8,6 +10,12 @@ const nodes = [
   { id: 5, name: "F" },
   { id: 6, name: "G" },
   { id: 7, name: "H" },
+  { id: 8, name: "I" },
+  { id: 9, name: "J" },
+  { id: 10, name: "K" },
+  { id: 11, name: "L" },
+  { id: 12, name: "M" },
+  { id: 13, name: "N" },
 ];
 
 const links = [
@@ -21,25 +29,45 @@ const links = [
   { source: 4, target: 5 },
   { source: 5, target: 6 },
   { source: 6, target: 7 },
+  { source: 6, target: 8 },
+  { source: 8, target: 9 },
+  { source: 8, target: 12 },
+  { source: 9, target: 10 },
+  { source: 4, target: 11 },
+  { source: 11, target: 12 },
+  { source: 12, target: 13 },
 ];
 
 // Set initial positions for nodes
 nodes[0].x = 70;
 nodes[0].y = 270;
-nodes[1].x = 170;
+nodes[1].x = 70;
 nodes[1].y = 70;
 nodes[2].x = 270;
-nodes[2].y = 270;
-nodes[3].x = 70;
-nodes[3].y = 470;
-nodes[4].x = 270;
+nodes[2].y = 170;
+nodes[3].x = 270;
+nodes[3].y = 320;
+nodes[4].x = 70;
 nodes[4].y = 470;
-nodes[5].x = 470;
-nodes[5].y = 470;
+nodes[5].x = 420;
+nodes[5].y = 420;
 nodes[6].x = 470;
-nodes[6].y = 270;
+nodes[6].y = 220;
 nodes[7].x = 470;
 nodes[7].y = 70;
+
+nodes[8].x = 570;
+nodes[8].y = 470;
+nodes[9].x = 570;
+nodes[9].y = 70;
+nodes[10].x = 670;
+nodes[10].y = 270;
+nodes[11].x = 170;
+nodes[11].y = 570;
+nodes[12].x = 370;
+nodes[12].y = 570;
+nodes[13].x = 570;
+nodes[13].y = 570;
 
 nodes.forEach((node) => {
   graph.addNode(node);
@@ -77,41 +105,57 @@ const node = svg
   .data(nodes)
   .enter()
   .append("g")
-  .attr("transform", (d) => `translate(${d.x},${d.y})`);
+  .attr("transform", (d) => `translate(${d.x},${d.y})`)
+  .attr("class", "NODE");
 
-node.append("circle").attr("r", 35).attr("fill", "rgb(0, 148, 185)");
+node.append("circle").attr("r", 35).attr("class", "NodeCircle");
 
 node
   .append("text")
   .text((d) => d.name)
-  .attr("dy", 5)
+  .attr("dy", 10)
   .attr("text-anchor", "middle")
   .attr("font-family", "Arial")
-  .attr("font-size", "25px");
+  .attr("font-size", "35px");
 
 // Keep track of highlighted paths
 
 const keepHighlight = [];
-
+const finalizedPath = [];
+const nodeHL = [];
 const highlightedPaths = [];
 
 // Function to highlight a specific path and remove highlight with transition
 function highlightPath(pathIndex) {
   highlightedPaths.push(pathIndex);
   keepHighlight.push(pathIndex);
+  if (!nodeHL.includes(links[pathIndex].source)) {
+    nodeHL.push(links[pathIndex].source);
+  }
+  if (!nodeHL.includes(links[pathIndex].target)) {
+    nodeHL.push(links[pathIndex].target);
+  }
+  node.classed("visited", (d, i) => nodeHL.includes(i));
   link.classed("highlighted", (d, i) => highlightedPaths.includes(i));
   link.classed("keepHL", (d, i) => keepHighlight.includes(i));
 
   setTimeout(() => {
     highlightedPaths.splice(0, 1);
     link.classed("highlighted", false);
-  }, 1000);
+  }, 500);
 }
 
-const bfsGenerator = graph.bfs(nodes[0], nodes[5]);
+function highlightFinalPath(pathIndex) {
+  finalizedPath.push(pathIndex);
+  link.classed("FinalPath", (d, i) => finalizedPath.includes(i));
+}
+
+let firstNode = 0; //These are the starting node
+let lastNode = 10; //and ending node, respectively
+
+const bfsGenerator = graph.bfs(nodes[firstNode], nodes[lastNode]);
 
 function findPathIndex(node1, node2) {
-  console.log(nodes[node1].name, nodes[node2].name);
   for (let i = 0; i < links.length; i++) {
     if (
       (links[i].source == node1 || links[i].source == node2) &&
@@ -123,9 +167,16 @@ function findPathIndex(node1, node2) {
   return -1;
 }
 
-let lastNode = nodes[0];
-function performBFS() {
-  const result = bfsGenerator.next();
+let lastPath;
+
+function onFinalResult(arr) {
+  for (let i = 0; i < arr.length - 1; i++) {
+    highlightFinalPath(findPathIndex(arr[i].id, arr[i + 1].id));
+  }
+}
+
+function performBFS(generator) {
+  const result = generator.next();
 
   if (!result.done) {
     const pathLen = result.value.path.length;
@@ -138,13 +189,34 @@ function performBFS() {
         highlightPath(pathIndex);
       }
     }
+    lastPath = result.value.path;
 
     // console.log(`Visit Node: ${result.value.currentNode}`);
     // console.log(`Current Path: ${result.value.path}`);
-    setTimeout(performBFS, 1000); // Delay for better visualization
+    setTimeout(performBFS, 500, generator); // Delay for better visualization
   } else {
-    console.log("BFS Completed");
+    //console.log("BFS Completed, last path: ", finalResult);
+    onFinalResult([...lastPath, nodes[lastNode]]);
   }
 }
 
-performBFS();
+//performBFS(bfsGenerator);
+
+function showCurrent(start, finish) {
+  document.querySelector("p#current").innerText =
+    nodes[start].name + " → " + nodes[finish].name;
+}
+
+function performRandom() {
+  let a = Math.floor(Math.random() * nodeCount);
+  let b = Math.floor(Math.random() * nodeCount);
+  while (b == a) {
+    b = Math.floor(Math.random() * nodeCount);
+  }
+  firstNode = a;
+  lastNode = b;
+  showCurrent(a, b);
+  performBFS(graph.bfs(nodes[a], nodes[b]));
+}
+
+performRandom();
