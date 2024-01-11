@@ -1,0 +1,18 @@
+.link {
+  fill: none;
+  stroke: black;
+  stroke-width: 10;
+  transition: stroke 200ms;
+}
+
+.keepHL.highlighted {
+  stroke: red;
+}
+
+.keepHL {
+  stroke: darkorange;
+}
+
+svg {
+  border: 5px solid black;
+}
