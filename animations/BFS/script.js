@@ -1,6 +1,4 @@
 // Sample data representing nodes and links
-const nodeCount = 14;
-
 const nodes = [
   { id: 0, name: "A" },
   { id: 1, name: "B" },
@@ -17,6 +15,8 @@ const nodes = [
   { id: 12, name: "M" },
   { id: 13, name: "N" },
 ];
+
+const nodeCount = nodes.length;
 
 const links = [
   { source: 0, target: 1 },
@@ -37,6 +37,8 @@ const links = [
   { source: 11, target: 12 },
   { source: 12, target: 13 },
 ];
+
+const linkCount = links.length;
 
 // Set initial positions for nodes
 nodes[0].x = 70;
