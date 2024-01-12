@@ -1,6 +1,4 @@
 // Sample data representing nodes and links
-const nodeCount = 14;
-
 const nodes = [
   { id: 0, name: "A" },
   { id: 1, name: "B" },
@@ -17,6 +15,8 @@ const nodes = [
   { id: 12, name: "M" },
   { id: 13, name: "N" },
 ];
+
+const nodeCount = nodes.length;
 
 const links = [
   { source: 0, target: 1 },
@@ -38,6 +38,8 @@ const links = [
   { source: 12, target: 13 },
 ];
 
+const linkCount = links.length;
+
 // Set initial positions for nodes
 nodes[0].x = 70;
 nodes[0].y = 270;
@@ -55,7 +57,6 @@ nodes[6].x = 470;
 nodes[6].y = 220;
 nodes[7].x = 470;
 nodes[7].y = 70;
-
 nodes[8].x = 570;
 nodes[8].y = 470;
 nodes[9].x = 570;
@@ -127,6 +128,9 @@ const highlightedPaths = [];
 
 // Function to highlight a specific path and remove highlight with transition
 function highlightPath(pathIndex) {
+  if (pathIndex < 0 || pathIndex >= linkCount) {
+    return;
+  }
   highlightedPaths.push(pathIndex);
   keepHighlight.push(pathIndex);
   if (!nodeHL.includes(links[pathIndex].source)) {
@@ -142,16 +146,19 @@ function highlightPath(pathIndex) {
   setTimeout(() => {
     highlightedPaths.splice(0, 1);
     link.classed("highlighted", false);
-  }, 500);
+  }, 400);
 }
 
 function highlightFinalPath(pathIndex) {
+  if (pathIndex < 0 || pathIndex >= linkCount) {
+    return;
+  }
   finalizedPath.push(pathIndex);
   link.classed("FinalPath", (d, i) => finalizedPath.includes(i));
 }
 
-let firstNode; //These are the starting node
-let lastNode; //and ending node, respectively
+let firstNode = 0; //These are the starting node
+let lastNode = 10; //and ending node, respectively
 
 function findPathIndex(node1, node2) {
   for (let i = 0; i < links.length; i++) {
@@ -165,38 +172,57 @@ function findPathIndex(node1, node2) {
   return -1;
 }
 
-let lastPath;
-
 function onFinalResult(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
     highlightFinalPath(findPathIndex(arr[i].id, arr[i + 1].id));
   }
 }
 
-function performBFS(generator) {
-  const result = generator.next();
+function onResult(arr) {
+  if (arr.length > 1) {
+    highlightPath(
+      findPathIndex(arr[arr.length - 1].id, arr[arr.length - 2].id)
+    );
+  }
+}
 
-  if (!result.done) {
-    const pathLen = result.value.path.length;
-    if (pathLen > 0) {
-      const pathIndex = findPathIndex(
-        result.value.currentNode.id,
-        result.value.path[pathLen - 1].id
-      );
-      if (pathIndex != -1) {
-        highlightPath(pathIndex);
+function performDFS(arr, end) {
+  let i = 0;
+  let clearInt = setInterval(() => {
+    onResult(arr[i]);
+    if (i >= arr.length || arr[i].includes(end)) {
+      clearInterval(clearInt);
+      if (arr[i].includes(end)) {
+        setTimeout(onFinalResult, 500, arr[i]);
       }
     }
-    lastPath = result.value.path;
-    setTimeout(performBFS, 500, generator); // Delay for better visualization
-  } else {
-    onFinalResult([...lastPath, nodes[lastNode]]);
-  }
+    i++;
+  }, 500);
 }
 
 function showCurrent(start, finish) {
   document.querySelector("p#current").innerText =
     nodes[start].name + " → " + nodes[finish].name;
+}
+
+function reset() {
+  while (keepHighlight.length > 0) {
+    keepHighlight.pop();
+  }
+  while (finalizedPath.length > 0) {
+    finalizedPath.pop();
+  }
+  while (nodeHL.length > 0) {
+    nodeHL.pop();
+  }
+  while (highlightedPaths.length > 0) {
+    highlightedPaths.pop();
+  }
+
+  //updates the classes
+  node.classed("visited", (d, i) => nodeHL.includes(i));
+  link.classed("highlighted", (d, i) => highlightedPaths.includes(i));
+  link.classed("keepHL", (d, i) => keepHighlight.includes(i));
 }
 
 function performRandom() {
@@ -208,7 +234,7 @@ function performRandom() {
   firstNode = a;
   lastNode = b;
   showCurrent(a, b);
-  performBFS(graph.bfs(nodes[a], nodes[b]));
+  performDFS(graph.dfs(nodes[a]), nodes[b]);
 }
 
 performRandom();
