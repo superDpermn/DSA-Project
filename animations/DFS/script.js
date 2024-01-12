@@ -1,19 +1,25 @@
 // Sample data representing nodes and links
 const nodes = [
-  { id: 0, name: "A" },
-  { id: 1, name: "B" },
-  { id: 2, name: "C" },
-  { id: 3, name: "D" },
-  { id: 4, name: "E" },
-  { id: 5, name: "F" },
-  { id: 6, name: "G" },
-  { id: 7, name: "H" },
-  { id: 8, name: "I" },
-  { id: 9, name: "J" },
-  { id: 10, name: "K" },
-  { id: 11, name: "L" },
-  { id: 12, name: "M" },
-  { id: 13, name: "N" },
+  { id: 0, name: "A", x: 70, y: 270 },
+  { id: 1, name: "B", x: 70, y: 70 },
+  { id: 2, name: "C", x: 270, y: 170 },
+  { id: 3, name: "D", x: 270, y: 320 },
+  { id: 4, name: "E", x: 70, y: 470 },
+  { id: 5, name: "F", x: 420, y: 420 },
+  { id: 6, name: "G", x: 470, y: 220 },
+  { id: 7, name: "H", x: 470, y: 70 },
+  { id: 8, name: "I", x: 570, y: 470 },
+  { id: 9, name: "J", x: 570, y: 70 },
+  { id: 10, name: "K", x: 670, y: 270 },
+  { id: 11, name: "L", x: 170, y: 570 },
+  { id: 12, name: "M", x: 370, y: 570 },
+  { id: 13, name: "N", x: 570, y: 570 },
+
+  { id: 14, name: "O", x: 870, y: 270 },
+  { id: 15, name: "P", x: 770, y: 470 },
+  { id: 16, name: "Q", x: 870, y: 70 },
+  { id: 17, name: "R", x: 1070, y: 270 },
+  { id: 18, name: "S", x: 970, y: 420 },
 ];
 
 const nodeCount = nodes.length;
@@ -36,39 +42,17 @@ const links = [
   { source: 4, target: 11 },
   { source: 11, target: 12 },
   { source: 12, target: 13 },
+
+  { source: 10, target: 14 },
+  { source: 8, target: 15 },
+  { source: 15, target: 18 },
+  { source: 14, target: 17 },
+  { source: 10, target: 16 },
+  { source: 17, target: 16 },
+  { source: 17, target: 18 },
 ];
 
 const linkCount = links.length;
-
-// Set initial positions for nodes
-nodes[0].x = 70;
-nodes[0].y = 270;
-nodes[1].x = 70;
-nodes[1].y = 70;
-nodes[2].x = 270;
-nodes[2].y = 170;
-nodes[3].x = 270;
-nodes[3].y = 320;
-nodes[4].x = 70;
-nodes[4].y = 470;
-nodes[5].x = 420;
-nodes[5].y = 420;
-nodes[6].x = 470;
-nodes[6].y = 220;
-nodes[7].x = 470;
-nodes[7].y = 70;
-nodes[8].x = 570;
-nodes[8].y = 470;
-nodes[9].x = 570;
-nodes[9].y = 70;
-nodes[10].x = 670;
-nodes[10].y = 270;
-nodes[11].x = 170;
-nodes[11].y = 570;
-nodes[12].x = 370;
-nodes[12].y = 570;
-nodes[13].x = 570;
-nodes[13].y = 570;
 
 nodes.forEach((node) => {
   graph.addNode(node);
@@ -194,6 +178,10 @@ function performDFS(arr, end) {
       clearInterval(clearInt);
       if (arr[i].includes(end)) {
         setTimeout(onFinalResult, 500, arr[i]);
+        setTimeout(() => {
+          reset();
+          performRandom();
+        }, 5000);
       }
     }
     i++;
@@ -220,9 +208,10 @@ function reset() {
   }
 
   //updates the classes
-  node.classed("visited", (d, i) => nodeHL.includes(i));
-  link.classed("highlighted", (d, i) => highlightedPaths.includes(i));
-  link.classed("keepHL", (d, i) => keepHighlight.includes(i));
+  node.classed("visited", false);
+  link.classed("highlighted", false);
+  link.classed("keepHL", false);
+  link.classed("FinalPath", false);
 }
 
 function performRandom() {
